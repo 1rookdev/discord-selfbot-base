@@ -28,7 +28,7 @@ client.on('messageCreate', async (message) => {
             const wait_time = Math.random() * (max - min) + min;
             await delay(wait_time);
 
-            await message.reply("> ```testing commands```\n> `test`: **prints hi, meant for testing purposes.**\n\n\n> ```guild commands```\n> `guild.id`: **prints the guild's id**\n> `guild.name`: **prints the guild's name**\n\n\n> ```client commands```\n> `client.info`: **fetches the client's uptime, friend, and guild count**\n> `client.avatar`: **fetches the client's avatar URL**\n> `client.id`: **fetches the client's user ID**\n> `client.status`: **fetches the client's status**\n> `client.status.set`: **sets the client's status**\n> `client.set.presence`: **sets the client's rich presence**\n> `client.stop.presence`: **stops the client's rich presence**\n")
+            await message.reply("> ```testing commands```\n> `test`: **prints hi, meant for testing purposes.**\n\n\n> ```guild commands```\n> `guild.id`: **prints the guild's id**\n> `guild.name`: **prints the guild's name**\n\n\n> ```client commands```\n> `client.info`: **fetches the client's uptime, friend, and guild count**\n> `client.avatar`: **fetches the client's avatar URL**\n> `client.id`: **fetches the client's user ID**\n> `client.status`: **fetches the client's status**\n> `client.status.set`: **sets the client's status**\n> `client.set.presence`: **sets the client's rich presence**\n> `client.stop.presence`: **stops the client's rich presence**\n\n\n> ```chat commands```\n> `chat.purge`: **purges an amount of messages from 1 to 100**\n")
             console.log("| --- keyword: [help], replied: [INFO] --- |")
         }
 
@@ -72,8 +72,8 @@ client.on('messageCreate', async (message) => {
             const wait_time = Math.random() * (max - min) + min;
             await delay(wait_time);
 
-            const uptime_mins = Math.round(client.uptime / 60000);
-            const uptime_secs = Math.round(client.uptime / 1000);
+            const uptime_mins = Math.floor(client.uptime / 60000);
+            const uptime_secs = Math.round(client.uptime / 1000) % 60;
 
             await message.reply(`**Uptime:** \`${uptime_mins} minutes, ${uptime_secs} seconds\`\n**Friends:** \`${client.relationships.friendCache.size}\`\n**Servers in:** \`${client.guilds.cache.size}\``);
             console.log("| --- keyword: [client.info], replied: [URL] --- |")
@@ -142,11 +142,9 @@ client.on('messageCreate', async (message) => {
                 await collected.first().reply("status has been set to `invisible`.\n\n*note that this doesn't work for the client, it only shows your changed status to others; your previous status (before it was changed) only is visible and functions for YOU.\nwhen the selfbot turns off, your status is back to normal (which was your previous one), and will not be back to what it was when the selfbot turns back on again.*")
                 }
 
-            } catch {
-                const collected = await message.channel.awaitMessages({ filter, max: 1, time: 30_000, errors: ["time"] });
-                if (!collected) {
-                    await message.reply("timed out. no changes made.")
-                }
+            } catch (error) {
+                await message.reply("Timed out or invalid choice. No changes made.");
+                console.log("| --- status configuration timed out --- |");
             }
         }
 
@@ -159,7 +157,7 @@ client.on('messageCreate', async (message) => {
 
             try {
                 const collected = await message.channel.awaitMessages({ filter, max: 1, time: 30_000, errors: ["time"] });
-                const response1 = collected.first().content.toLowerCase();
+                const response1 = collected.first().content;
 
                 if (response1) {
                     const wait_time = Math.random() * (max - min) + min;
@@ -216,7 +214,8 @@ client.on('messageCreate', async (message) => {
                             console.log("| --- keyword: [client.set.presence {competing} ], replied: [SUCCESS] --- |")
                         }
                     } catch (error) {
-                        await message.reply("timed out. no changes made.")
+                        await message.reply("timed out. no changes made.");
+                        console.log("| --- rich presence configuration timed out --- |");
                     }
                 }
             } catch (error) {
@@ -231,6 +230,39 @@ client.on('messageCreate', async (message) => {
             await client.user.setActivity()
             await message.reply("rich presence has been stopped.")
             console.log("| --- keyword: [client.stop.presence], replied: [INFO] --- |")
+        }
+
+        else if (message.content.toLowerCase() === "chat.purge") {
+            const wait_time = Math.random() * (max - min) + min;
+            await delay(wait_time);
+
+            await message.reply("how many of your own messages would you like to delete? (max 100)");
+            const filter = m => m.author.id === client.user.id;
+
+            try {
+                const collected = await message.channel.awaitMessages({ filter, max: 1, time: 20_000, errors: ["time"] });
+                const amount = parseInt(collected.first().content);
+
+                if (!isNaN(amount) && amount > 0 && amount <= 100) {
+                    const wait_time = Math.random() * (max - min) + min;
+                    await delay(wait_time);
+
+                    const messages = await message.channel.messages.fetch({limit: 100});
+                    const selfmessages = [...messages.filter(m => m.author.id === client.user.id).values()].slice(0, amount);
+                    for (const msg of selfmessages) {
+                        await msg.delete();
+                        await delay(wait_time);
+                    }
+
+                    console.log(`| --- keyword: [client.purge], executed: [DELETED ${amount} MESSAGES] --- |`);
+                } else {
+                    await message.reply("*invalid number. provide a number from 1-100.*")
+                }
+            }
+            catch (error) {
+                console.log(error)
+                await message.reply("timed out. no changes made.")
+            }
         }
     }
 });
