@@ -11,8 +11,6 @@ const max = 0.99;
 // prints that the client is ready
 client.on('ready', async () => {
     console.log('--- client is ready ---')
-
-
 });
 
 client.on('messageCreate', async (message) => {
@@ -77,7 +75,8 @@ client.on('messageCreate', async (message) => {
             const uptime_mins = Math.round(client.uptime / 60000);
             const uptime_secs = Math.round(client.uptime / 1000);
 
-            await message.reply(`**Uptime:** \`${uptime_mins} minutes, ${uptime_secs} seconds\`\n**Friends:** \`${client.relationships.friendCache.size}\`\n**Servers in:** \`${client.guilds.cache.size}\``)
+            await message.reply(`**Uptime:** \`${uptime_mins} minutes, ${uptime_secs} seconds\`\n**Friends:** \`${client.relationships.friendCache.size}\`\n**Servers in:** \`${client.guilds.cache.size}\``);
+            console.log("| --- keyword: [client.info], replied: [URL] --- |")
         }
 
         else if (message.content.toLowerCase() === "client.id") {
