@@ -232,26 +232,22 @@ client.on('messageCreate', async (message) => {
             console.log("| --- keyword: [client.stop.presence], replied: [INFO] --- |")
         }
 
-        else if (message.content.toLowerCase() === "chat.purge") {
+        else if (message.content.toLowerCase().startsWith("chat.purge ")) {
             const wait_time = Math.random() * (max - min) + min;
             await delay(wait_time);
 
-            await message.reply("how many of your own messages would you like to delete? (max 100)");
-            const filter = m => m.author.id === client.user.id;
+            const argument = message.content.split(" "); // split chat.purge into 2 arrays, "chat.purge" (index 0), and " " (index 1, which is going to be the number)
+            const amount = parseInt(argument[1]); // creates a constant variable named amount, which is going to be the number that you entered
 
             try {
-                const collected = await message.channel.awaitMessages({ filter, max: 1, time: 20_000, errors: ["time"] });
-                const amount = parseInt(collected.first().content);
-
                 if (!isNaN(amount) && amount > 0 && amount <= 100) {
-                    const wait_time = Math.random() * (max - min) + min;
+                    const wait_time = Math.random() * (0.5 - 0.3) + 0.3; // faster delete
                     await delay(wait_time);
-
                     const messages = await message.channel.messages.fetch({limit: 100});
                     const selfmessages = [...messages.filter(m => m.author.id === client.user.id).values()].slice(0, amount);
                     for (const msg of selfmessages) {
-                        await msg.delete();
                         await delay(wait_time);
+                        await msg.delete();
                     }
 
                     console.log(`| --- keyword: [client.purge], executed: [DELETED ${amount} MESSAGES] --- |`);
@@ -261,11 +257,10 @@ client.on('messageCreate', async (message) => {
             }
             catch (error) {
                 console.log(error)
-                await message.reply("timed out. no changes made.")
+                await message.reply("an error occured while trying to purge messages.\n\n*try entering a valid number from 1-100*.\nexample: `chat.purge 5`")
             }
         }
     }
 });
-
 // login token
 client.login(process.env.TOKEN);
