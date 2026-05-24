@@ -1,5 +1,5 @@
 require('dotenv').config();
-const {Client} = require('discord.js-selfbot-v13');
+const {Client, Webhook} = require('discord.js-selfbot-v13');
 const client = new Client({
     checkUpdate: false
 });
@@ -28,7 +28,7 @@ client.on('messageCreate', async (message) => {
             const wait_time = Math.random() * (max - min) + min;
             await delay(wait_time);
 
-            await message.reply("> ```testing commands```\n> `test`: **prints hi, meant for testing purposes.**\n\n\n> ```guild commands```\n> `guild.id`: **prints the guild's id**\n> `guild.name`: **prints the guild's name**\n\n\n> ```client commands```\n> `client.info`: **fetches the client's uptime, friend, and guild count**\n> `client.avatar`: **fetches the client's avatar URL**\n> `client.id`: **fetches the client's user ID**\n> `client.status`: **fetches the client's status**\n> `client.status.set`: **sets the client's status**\n> `client.set.presence`: **sets the client's rich presence**\n> `client.stop.presence`: **stops the client's rich presence**\n\n\n> ```chat commands```\n> `chat.purge`: **purges an amount of messages from 1 to 100**\n")
+            await message.reply("> ```testing commands```\n> `test`: **prints hi, meant for testing purposes.**\n\n\n> ```guild commands```\n> `guild.id`: **prints the guild's id**\n> `guild.name`: **prints the guild's name**\n\n\n> ```client commands```\n> `client.info`: **fetches the client's uptime, friend, and guild count**\n> `client.avatar`: **fetches the client's avatar URL**\n> `client.id`: **fetches the client's user ID**\n> `client.status`: **fetches the client's status**\n> `client.status.set`: **sets the client's status**\n> `client.set.presence`: **sets the client's rich presence**\n> `client.stop.presence`: **stops the client's rich presence**\n\n\n> ```chat commands```\n> `chat.purge [number]`: **purges an amount of messages from 1 to 100**\n> `chat.spam [number] [message]`: **spams an amount of messages from 1 to 100**")
             console.log("| --- keyword: [help], replied: [INFO] --- |")
         }
 
@@ -250,7 +250,7 @@ client.on('messageCreate', async (message) => {
                         await msg.delete();
                     }
 
-                    console.log(`| --- keyword: [client.purge], executed: [DELETED ${amount} MESSAGES] --- |`);
+                    console.log(`| --- keyword: [chat.purge (number)], executed: [DELETED ${amount} MESSAGES] --- |`);
                 } else {
                     await message.reply("*invalid number. provide a number from 1-100.*")
                 }
@@ -260,7 +260,51 @@ client.on('messageCreate', async (message) => {
                 await message.reply("an error occured while trying to purge messages.\n\n*try entering a valid number from 1-100*.\nexample: `chat.purge 5`")
             }
         }
-    }
+
+        else if (message.content.toLowerCase() === "chat.purge") {
+            const wait_time = Math.random() - (max - min) + min;
+            await delay(wait_time)
+            
+            message.reply("wrong command, use: `chat.purge [number]`");
+            console.log("| --- keyword: [chat.purge], executed: [INFO] --- |");
+        }
+
+        else if (message.content.toLowerCase().startsWith("chat.spam ")) {
+            const wait_time = Math.random() * (max - min) + min;
+            await delay(wait_time);
+
+            const parts = message.content.split(" ");
+
+            const amount = parseInt(parts[1]);
+            const spam_msg = parts.slice(2).join(" ");
+
+            try {
+                if (!isNaN(amount) && amount > 0 && amount <= 100) {
+                    const wait_time = Math.random() * (max - min) + min;
+                    await delay(wait_time)
+                    for (let spammed_msgs = 1; spammed_msgs <= amount; spammed_msgs++) {
+                        const wait_time = Math.random() * (max - min) + min;
+                        await delay(wait_time);
+                        await message.channel.send(spam_msg);
+                    }
+                }
+                else {
+                    await message.reply("try entering a valid number from 1-100")
+                }
+            }
+            catch (error) {
+                console.log(error)
+                await message.reply("an error occured while trying to spam messages.\n\n*try entering a valid number from 1-100*.\nexample: `chat.spam 5 hello world`")
+            }
+        }
+
+        else if (message.content.toLowerCase() === "chat.spam") {
+            const wait_time = Math.random() * (max - min) + min;
+            await delay(wait_time);
+
+            await message.reply("wrong command, use: `chat.spam [number] [message]`")
+        }
+    } 
 });
 // login token
 client.login(process.env.TOKEN);
